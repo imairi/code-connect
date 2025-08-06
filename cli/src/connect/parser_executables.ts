@@ -30,9 +30,21 @@ type ParserInfo = {
 
 const FIRST_PARTY_PARSERS: Record<CodeConnectExecutableParser, ParserInfo> = {
   swift: {
-    command: async (cwd, config) => {
-      return `swift run --package-path ${await getSwiftParserDir(cwd, (config as any).xcodeprojPath, (config as any).swiftPackagePath)} figma-swift`
+    command: async (cwd, config, mode) => {
+        // --- ここからが証明コード ---
+        console.log("\n\n\n--- 診断：修正されたコマンド生成ロジックが実行されています ---");
+
+        const subCommand = (mode === 'CREATE' ? 'create' : 'parse').toLowerCase();
+        const packagePath = await (0, get_swift_parser_dir_1.getSwiftParserDir)(cwd, config.xcodeprojPath, config.swiftPackagePath);
+        const finalCommand = `swift run --package-path ${packagePath} figma-swift ${subCommand} --io-path ${temporaryIOFilePath}`;
+
+        console.log("実行予定のコマンド:", finalCommand);
+        console.log("--- 診断終了 ---\n\n\n");
+        // --- ここまでが証明コード ---
+
+        return finalCommand;
     },
+    temporaryIOFilePath: temporaryIOFilePath,
   },
   compose: {
     command: async (cwd, config, mode) => {
